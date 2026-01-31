@@ -1,0 +1,824 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: #160128;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* padding: 20px; */
+    touch-action: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.game-outer-container {
+    position: relative;
+    max-width: 800px;
+    max-height: 700px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* mask fruit rain within this container */
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border: 4px solid #d4b5f5;
+}
+
+.rainbow-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ff0000; /* will be animated by GSAP */
+    opacity: 0;
+    pointer-events: none;
+    /* above canvas (z=1) but below big head glow (z=4) and fruit rain (z=6) */
+    z-index: 3;
+}
+
+@media (max-width: 600px) {
+    .game-outer-container {
+        max-height: 100%;
+        border: none;
+    }
+}
+
+.bg-image {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 768px;
+    height: 768px;
+    max-width: 768px;
+    max-height: 768px;
+    background-image: url('src/img/bg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transform: translate(-50%, -50%);
+    z-index: -2;
+    animation: rotateBg 60s linear infinite;
+    pointer-events: none;
+    /* display: none; */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+@keyframes rotateBg {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+.container {
+    width: 100%;
+    /* max-width: 600px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* center contents vertically inside container */
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    /* border: 1px solid red; */
+}
+
+.logo {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@media (max-height: 725px) {
+    .logo {
+        transform: scale(0.667);
+        transform-origin: top left;
+    }
+}
+
+.game-header {
+    width: var(--game-display-width, 352px);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0;
+    color: white;
+    z-index: 1;
+}
+
+.score-board {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+    width: 100%;
+}
+
+.score {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    color: #00ffff;
+    display: block;
+    background: black;
+    padding: 4px 5px;
+    /* padding-right: 6px; */
+    border-radius: 4px;
+    transform: translate(5px, 8px);
+
+    /* padding: 10px 15px; */
+    /* -webkit-text-stroke: 3px black; */
+    /* text-stroke: 3px black; */
+    /* text-shadow: 
+        -3px -3px 0 black,
+        3px -3px 0 black,
+        -3px 3px 0 black,
+        3px 3px 0 black,
+        -3px 0 0 black,
+        3px 0 0 black,
+        0 -3px 0 black,
+        0 3px 0 black; */
+}
+
+.game-wrapper {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    background: rgba(21, 0, 43, 0.9);
+    border-radius: 12px;
+    /* padding: 3px; */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    border: 2px solid #000000;
+}
+
+#gameCanvas {
+    display: block;
+    background: transparent;
+    flex-shrink: 0;
+    aspect-ratio: 15 / 23;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 10px;
+    touch-action: none;
+    border: 5px solid #42bbff;
+    box-shadow: 0 0 0 1px black;
+    position: relative;
+    z-index: 1;
+}
+
+.cloud {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    width: 400px;
+}
+
+.cloud-ul {
+    top: 0;
+    left: 0;
+}
+
+.cloud-ur {
+    top: 0;
+    right: 0;
+}
+
+.cloud-ll {
+    bottom: 0;
+    left: 0;
+}
+
+.cloud-lr {
+    bottom: 0;
+    right: 0;
+}
+
+.big-head-glow {
+    position: absolute;
+    background: transparent;
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0.6;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    transform-origin: 50% 50%;
+    filter: blur(8px);
+}
+
+.big-head {
+    position: absolute;
+    background: transparent;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 1;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    transform-origin: 50% 50%;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.eye-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15%;
+    pointer-events: none;
+    z-index: 6;
+    transform-origin: 50% 50%;
+}
+
+.eye {
+    flex: 0 0 auto;
+    width: 20%;
+    height: 20%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.eye-left {
+    transform: translateY(-5px);
+    animation: rotateEyeLeft .5s linear infinite;
+}
+
+.eye-right {
+    transform: translateY(-5px) scaleX(-1);
+    animation: rotateEyeRight .5s linear infinite;
+}
+
+@keyframes rotateEyeLeft {
+    from { transform: translateY(-5px) rotate(0deg); }
+    to { transform: translateY(-5px) rotate(360deg); }
+}
+
+@keyframes rotateEyeRight {
+    from { transform: translateY(-5px) scaleX(-1) rotate(0deg); }
+    to { transform: translateY(-5px) scaleX(-1) rotate(-360deg); }
+}
+
+.big-tail {
+    position: absolute;
+    background: transparent;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 1;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+.fruit-rain-item {
+    position: absolute;
+    top: -10%;
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    transform-origin: center center;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    animation: fruitFall 0.55s linear forwards;
+    z-index: 6;
+}
+
+@keyframes fruitFall {
+    0% {
+        top: -10%;
+        opacity: 1;
+    }
+    100% {
+        top: 110%;
+        opacity: 0.9;
+    }
+}
+
+@keyframes fruitSpin {
+    from {
+        transform: translateX(-50%) scale(var(--fruit-scale, 1)) rotate(0deg);
+    }
+    to {
+        transform: translateX(-50%) scale(var(--fruit-scale, 1)) rotate(360deg);
+    }
+}
+
+.debug-window-size {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: #00ffff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow:
+        -1px -1px 0 black,
+        1px -1px 0 black,
+        -1px 1px 0 black,
+        1px 1px 0 black;
+}
+
+.icons-top-right {
+    --icons-offset: 10px;
+    position: absolute;
+    top: var(--icons-offset);
+    right: var(--icons-offset);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 4px;
+    z-index: 100;
+    pointer-events: auto;
+    /* border: 1px solid red; */
+}
+
+.hs-icon {
+    position: relative;
+    z-index: 1;
+    width: auto;
+    height: auto;
+    transform: scale(3) translateX(-5px);
+    transform-origin: top right;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.ins-icon-wrap {
+    position: absolute;
+    right: 17px;
+    display: inline-flex;
+    position: relative;
+    transform: scale(3);
+    transform-origin: top left;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.ins-icon {
+    width: auto;
+    height: auto;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.ins-icon-rainbow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #1fc7ff;
+    -webkit-mask-image: url('src/img/ins_icon.png');
+    mask-image: url('src/img/ins_icon.png');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.high-score-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 0, 30, 0.96);
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1rem;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    z-index: 11;
+    border: 5px solid #ff0000; /* rainbow via GSAP, same as game canvas */
+}
+
+.high-score-overlay.visible {
+    display: flex;
+}
+
+.high-score-header {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 6px;
+}
+
+.high-score-row {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    padding: 4px 0;
+}
+
+.high-score-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 4px;
+    padding-right: 4px;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+
+.high-score-row:nth-child(odd) {
+    background: rgba(22, 1, 40, 0.6);
+}
+
+.high-score-row:nth-child(even) {
+    background: rgba(12, 0, 24, 0.6);
+}
+
+.col-rank {
+    width: 20%;
+    padding-left: 6px;
+}
+
+.col-initials {
+    width: 40%;
+    text-align: center;
+}
+
+.col-score {
+    width: 40%;
+    text-align: right;
+    padding-right: 6px;
+}
+
+.high-score-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.high-score-list::-webkit-scrollbar-track {
+    background: #160128;
+}
+
+.high-score-list::-webkit-scrollbar-thumb {
+    background: #3fc2ed;
+    border: 2px solid #251049;
+}
+
+.high-score-list {
+    scrollbar-width: thin;
+    scrollbar-color: #3fc2ed #160128;
+}
+
+/* Start screen: play + instructions in lower 3rd */
+.start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 15%;
+    box-sizing: border-box;
+    z-index: 9;
+    pointer-events: none;
+}
+
+.start-screen-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    pointer-events: auto;
+    box-sizing: border-box;
+}
+
+.start-btn {
+    width: 100%;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    color: #000000;
+    background: #ff0000; /* rainbow via GSAP */
+    border: none;
+    cursor: pointer;
+    padding: 10px 8px;
+    box-sizing: border-box;
+}
+
+#startPlayBtn {
+    /* transform: translateY(3px); */
+    padding-top: 12px;
+}
+
+#startInstructionsBtn {
+    background: none;
+    color: #ff0000; /* rainbow via GSAP */
+    font-size: 0.75rem; /* 40% smaller than 1.2rem */
+    padding: 12px 8px;
+}
+
+.start-btn:hover {
+    opacity: 0.9;
+}
+
+.start-screen.hidden {
+    display: none;
+}
+
+/* Instructions overlay (same style as high-score board) */
+.instructions-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 0, 30, 0.96);
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.75rem;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    z-index: 12;
+    border: 5px solid #ff0000; /* rainbow via GSAP */
+}
+
+.instructions-overlay.visible {
+    display: flex;
+}
+
+.instructions-header {
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+.instructions-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.4;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.instructions-body p {
+    margin: 0 0 4px 0;
+}
+
+.instructions-bullet {
+    display: block;
+    text-align: center;
+    margin: 4px 0;
+    padding-bottom: 7px;
+    font-size: 0.6rem;
+}
+
+.instructions-close-btn {
+    align-self: center;
+    margin-top: auto;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    color: #000000;
+    background: #ff0000; /* rainbow via GSAP */
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.instructions-close-btn:hover {
+    opacity: 0.9;
+}
+
+.fps-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #00ffff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 
+        -2px -2px 0 black,
+        2px -2px 0 black,
+        -2px 2px 0 black,
+        2px 2px 0 black;
+}
+
+.game-over {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    transform: translateY(-50%);
+    background: #ff0000; /* rainbow via GSAP, full opacity */
+    color: #000000;
+    padding: 14px 22px;
+    border-radius: 0;
+    text-align: center;
+    z-index: 10;
+    font-family: 'Press Start 2P', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.game-over.hidden {
+    display: none;
+}
+
+.game-over-title {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin: 0;
+    color: #000000;
+}
+
+.game-over-title-gap {
+    font-size: 0.3em;
+    vertical-align: baseline;
+}
+
+.game-over-buttons {
+    position: absolute;
+    top: calc(50% + 40px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    z-index: 10;
+}
+
+.game-over-buttons.hidden {
+    display: none;
+}
+
+.game-over-btn {
+    width: 45px;
+    height: 45px;
+    padding: 6px;
+    border: 3px solid #ff0000; /* rainbow via GSAP */
+    box-sizing: content-box;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0;
+    letter-spacing: 1px;
+    color: transparent;
+    border-radius: 5px;
+    background-color: #000000;
+    cursor: pointer;
+    text-align: center;
+    transform-origin: top left;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+#playAgainBtn {
+    background-image: url('src/img/replay_button.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 45px 45px;
+}
+
+#hsBtn {
+    background-image: url('src/img/hs_button.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 45px 45px;
+}
+
+.game-over-btn:hover {
+    opacity: 0.9;
+}
+
+.high-score-entry {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px;
+    box-sizing: border-box;
+    background: rgba(10, 0, 30, 0.96);
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    z-index: 12;
+    border: 5px solid #ff0000;
+    min-width: 220px;
+    border-radius: 12px;
+}
+
+.high-score-entry.hidden {
+    display: none;
+}
+
+.hs-entry-score {
+    font-size: 1.2rem;
+    text-align: center;
+    margin: 0;
+}
+
+.hs-entry-label {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    text-align: center;
+    margin: 0;
+}
+
+.hs-entry-input {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.2rem;
+    width: 7em;
+    text-align: center;
+    letter-spacing: 0.2em;
+    background: #ff0000;
+    color: #000000;
+    border: none;
+    padding: 10px 12px;
+    outline: none;
+    border-radius: 6px;
+}
+
+.hs-entry-input::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 600px) {
+    .score {
+        font-size: 1rem;
+    }
+    .start-btn {
+        font-size: 1rem;
+    }
+    #startInstructionsBtn {
+        /* font-size: 0.6rem;  */
+    }
+}

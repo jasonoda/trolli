@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="debugWindowSize" class="debug-window-size"></div>
+    <div class="bg-image"></div>
+    
+    <div class="game-outer-container">
+        <div class="icons-top-right">
+            <img id="hsIcon" src="src/img/hs_icon.png" class="hs-icon" alt="" role="button" tabindex="0">
+            <div id="insIcon" class="ins-icon-wrap" role="button" tabindex="0" aria-label="Instructions">
+                <img src="src/img/ins_icon.png" class="ins-icon" alt="" aria-hidden="true">
+                <div id="insIconRainbow" class="ins-icon-rainbow"></div>
+            </div>
+        </div>
+        <img src="src/img/clouds_ul.png" class="cloud cloud-ul" alt="">
+        <img src="src/img/clouds_ur.png" class="cloud cloud-ur" alt="">
+        <img src="src/img/clouds_ll.png" class="cloud cloud-ll" alt="">
+        <img src="src/img/clouds_lr.png" class="cloud cloud-lr" alt="">
+        <img src="src/img/logo.png" class="logo" alt="">
+        <div class="container">
+            <div class="game-header">
+                <div class="score-board">
+                    <div class="score">SCORE:<span id="score">0</span></div>
+                </div>
+            </div>
+            <div class="game-wrapper">
+                <canvas id="gameCanvas"></canvas>
+                <div id="rainbowOverlay" class="rainbow-overlay"></div>
+                <div id="bigHeadGlow" class="big-head-glow"></div>
+                <div id="bigHead" class="big-head">
+                    <div id="eyeContainer" class="eye-container">
+                        <div id="eyeLeft" class="eye eye-left"></div>
+                        <div id="eyeRight" class="eye eye-right"></div>
+                    </div>
+                </div>
+                <div id="bigTail" class="big-tail"></div>
+                <div id="fpsCounter" class="fps-counter">FPS: 0</div>
+                <div id="highScoreOverlay" class="high-score-overlay">
+                    <div class="high-score-header">HIGH SCORES</div>
+                    <div id="highScoreList" class="high-score-list"></div>
+                </div>
+                <div id="startScreen" class="start-screen">
+                    <div class="start-screen-buttons">
+                        <button id="startPlayBtn" class="start-btn">PLAY</button>
+                        <button id="startInstructionsBtn" class="start-btn">INSTRUCTIONS</button>
+                    </div>
+                </div>
+                <div id="instructionsOverlay" class="instructions-overlay">
+                    <div class="instructions-header">INSTRUCTIONS</div>
+                    <div class="instructions-body">
+                        <p id="instructionsMove">Move the worm with arrow keys or swipe</p>
+                        <span class="instructions-bullet">•</span>
+                        <p>Eat fruit to grow and score</p>
+                        <span class="instructions-bullet">•</span>
+                        <p>Don't hit yourself or the walls</p>
+                        <span class="instructions-bullet">•</span>
+                        <p>Gain bonuses for getting your worm multiple colors</p>
+                    </div>
+                    <button id="instructionsCloseBtn" class="instructions-close-btn">CLOSE</button>
+                </div>
+                <div id="gameOver" class="game-over hidden">
+                    <div class="game-over-title">GAME<span class="game-over-title-gap"> </span>OVER</div>
+                </div>
+                <div id="gameOverButtons" class="game-over-buttons hidden">
+                    <button id="playAgainBtn" class="game-over-btn"></button>
+                    <button id="hsBtn" class="game-over-btn"></button>
+                </div>
+                <div id="highScoreEntry" class="high-score-entry hidden">
+                    <div class="hs-entry-score" id="hsEntryScore">0</div>
+                    <label id="hsEntryLabel" class="hs-entry-label" for="hsEntryInput">ENTER YOUR INITIALS</label>
+                    <input type="text" id="hsEntryInput" class="hs-entry-input" maxlength="3" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="AAA" />
+                </div>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
