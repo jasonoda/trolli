@@ -10,10 +10,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="loadOverlay" class="load-overlay" aria-hidden="true"></div>
     <div id="debugWindowSize" class="debug-window-size"></div>
     <div class="bg-image"></div>
     
     <div class="game-outer-container">
+        <div id="flashOverlay" class="flash-overlay" aria-hidden="true"></div>
         <div class="icons-top-right">
             <img id="hsIcon" src="src/img/hs_icon.png" class="hs-icon" alt="" role="button" tabindex="0">
             <div id="insIcon" class="ins-icon-wrap" role="button" tabindex="0" aria-label="Instructions">
@@ -45,6 +47,7 @@
                 <div id="bigTail" class="big-tail"></div>
                 <div id="fpsCounter" class="fps-counter">FPS: 0</div>
                 <div id="highScoreOverlay" class="high-score-overlay">
+                    <button type="button" id="hsCloseBtn" class="high-score-close-btn" aria-label="Close high scores">×</button>
                     <div class="high-score-header">HIGH SCORES</div>
                     <div id="highScoreList" class="high-score-list"></div>
                 </div>
@@ -82,6 +85,7 @@
             </div>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     </div>
     <script src="script.js"></script>
 </body>

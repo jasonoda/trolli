@@ -22,6 +22,14 @@ const bigTail = document.getElementById('bigTail');
 const fpsCounter = document.getElementById('fpsCounter');
 const rainbowOverlay = document.getElementById('rainbowOverlay');
 
+function playSound(src, options = {}) {
+    if (typeof Howl === 'undefined') return null;
+    const howl = new Howl({ src: [src], volume: options.volume ?? 1, loop: options.loop ?? false });
+    howl.play();
+    return howl;
+}
+let startMusicHowl = null;
+
 // Mobile-first grid size
 const GRID_SIZE = 35;
 let cellSize;
@@ -392,6 +400,7 @@ let colorBonusFloat = null;
 let fruitRainIntervalId = null;
 let fruitRainTimeoutId = null;
 let gameOverTimeoutId = null;
+let startDelayTimeoutId = null;
 let pendingHighScore = 0;
 
 const HIGHSCORE_KEY = 'trolli_highscores';
@@ -1647,6 +1656,7 @@ function update() {
     const ateFood = head.x === food.x && head.y === food.y;
     
     if (ateFood) {
+        playSound('src/sounds/score.mp3');
         const baseSize = cellSize;
         const centerX = food.x * baseSize + baseSize / 2;
         const centerY = food.y * baseSize + baseSize / 2;
@@ -1758,6 +1768,11 @@ function update() {
 function gameOver() {
     gameRunning = false;
     clearInterval(gameLoop);
+    if (startMusicHowl) {
+        startMusicHowl.stop();
+        startMusicHowl = null;
+    }
+    playSound('src/sounds/death.mp3');
     
     // Kill GSAP animations and set big head to final position
     if (bigHead && typeof gsap !== 'undefined' && snake.length > 0) {
@@ -1793,6 +1808,38 @@ function gameOver() {
     
     draw();
 
+    // Flash overlay: pop to 0.5 then fade to 0
+    const flashEl = document.getElementById('flashOverlay');
+    if (flashEl && typeof gsap !== 'undefined') {
+        gsap.set(flashEl, { opacity: 0.5 });
+        gsap.to(flashEl, { opacity: 0, duration: 1, ease: 'power1.out' });
+    }
+
+    // Game wrapper (canvas container): grow then shrink + dizzy rotation
+    const gameWrapper = canvas ? canvas.parentElement : null;
+    if (gameWrapper && typeof gsap !== 'undefined') {
+        gsap.fromTo(gameWrapper, { scale: 1 }, {
+            keyframes: [
+                { scale: 1.12, duration: 0.28, ease: 'power2.out' },
+                { scale: 1, duration: 0.65, ease: 'power2.in' }
+            ],
+            overwrite: true
+        });
+        gsap.fromTo(gameWrapper, { rotation: 0 }, {
+            keyframes: [
+                { rotation: 6, duration: 0.18 },
+                { rotation: -6, duration: 0.28 },
+                { rotation: 5, duration: 0.22 },
+                { rotation: -5, duration: 0.26 },
+                { rotation: 3, duration: 0.18 },
+                { rotation: -2, duration: 0.14 },
+                { rotation: 0, duration: 0.18 }
+            ],
+            ease: 'power2.inOut',
+            overwrite: true
+        });
+    }
+
     // Flash rainbow overlay: start fully opaque, then fade to 0 in 1 second
     if (rainbowOverlay && typeof gsap !== 'undefined') {
         gsap.set(rainbowOverlay, { opacity: 1 });
@@ -1816,6 +1863,20 @@ function gameOver() {
                 hsOverlayEl.classList.add('visible');
             }
             if (highScoreEntry) highScoreEntry.classList.remove('hidden');
+            playSound('src/sounds/highscore.mp3');
+            if (highScoreEntry && typeof gsap !== 'undefined') {
+                gsap.fromTo(highScoreEntry, { scale: 1, xPercent: -50, yPercent: -50 }, {
+                    keyframes: [
+                        { scale: 1.2, xPercent: -50, yPercent: -50, duration: 0.5, ease: 'power2.out' },
+                        { scale: 1, xPercent: -50, yPercent: -50, duration: 0.8, ease: 'power2.inOut' }
+                    ]
+                });
+            }
+            const flashElHs = document.getElementById('flashOverlay');
+            if (flashElHs && typeof gsap !== 'undefined') {
+                gsap.set(flashElHs, { opacity: 0.5 });
+                gsap.to(flashElHs, { opacity: 0, duration: 2, ease: 'power1.out' });
+            }
             if (hsEntryScore) hsEntryScore.textContent = '#' + String(rank);
             if (hsEntryInput) {
                 hsEntryInput.value = '';
@@ -1887,6 +1948,20 @@ function startFruitRain(durationMs = 2000) {
 }
 
 function resetGame() {
+    if (startMusicHowl) {
+        startMusicHowl.stop();
+        startMusicHowl = null;
+    }
+    startMusicHowl = playSound('src/sounds/startMusic.mp3', { loop: false });
+    if (canvas && typeof gsap !== 'undefined') {
+        gsap.killTweensOf(canvas, 'scale,rotation');
+        gsap.set(canvas, { scale: 1, rotation: 0 });
+    }
+    const gameWrapper = canvas ? canvas.parentElement : null;
+    if (gameWrapper && typeof gsap !== 'undefined') {
+        gsap.killTweensOf(gameWrapper);
+        gsap.set(gameWrapper, { scale: 1, rotation: 0 });
+    }
     colorBonusFloat = null;
     // Clear any pending game over FX
     if (fruitRainIntervalId) {
@@ -1900,6 +1975,10 @@ function resetGame() {
     if (gameOverTimeoutId) {
         clearTimeout(gameOverTimeoutId);
         gameOverTimeoutId = null;
+    }
+    if (startDelayTimeoutId) {
+        clearTimeout(startDelayTimeoutId);
+        startDelayTimeoutId = null;
     }
 
     const centerX = Math.floor(gridWidth / 2);
@@ -2085,18 +2164,22 @@ function resetGame() {
         }, 0);
     }
     
-    gameRunning = true;
+    gameRunning = false;
     if (gameLoop) {
         clearInterval(gameLoop);
+        gameLoop = null;
     }
-
     lastUpdateTime = performance.now();
     const intervalMs = getGameUpdateIntervalMs();
-    gameLoop = setInterval(() => {
-        if (!gamePaused) {
-            update();
-        }
-    }, intervalMs);
+    startDelayTimeoutId = setTimeout(() => {
+        startDelayTimeoutId = null;
+        gameRunning = true;
+        gameLoop = setInterval(() => {
+            if (!gamePaused) {
+                update();
+            }
+        }, intervalMs);
+    }, 2000);
 }
 
 function checkImmediateCollision(nextDir) {
@@ -2230,18 +2313,26 @@ function applySwipeDirection(deltaX, deltaY) {
     if (absDeltaX > absDeltaY) {
         if (deltaX > 0 && direction.x === 0) {
             nextDirection = { x: 1, y: 0 };
-            if (direction.y !== 0 && !checkImmediateCollision(nextDirection)) direction = { x: 1, y: 0 };
+            if (direction.y !== 0 && !checkImmediateCollision(nextDirection)) {
+                direction = { x: 1, y: 0 };
+            }
         } else if (deltaX < 0 && direction.x === 0) {
             nextDirection = { x: -1, y: 0 };
-            if (direction.y !== 0 && !checkImmediateCollision(nextDirection)) direction = { x: -1, y: 0 };
+            if (direction.y !== 0 && !checkImmediateCollision(nextDirection)) {
+                direction = { x: -1, y: 0 };
+            }
         }
     } else {
         if (deltaY > 0 && direction.y === 0) {
             nextDirection = { x: 0, y: 1 };
-            if (direction.x !== 0 && !checkImmediateCollision(nextDirection)) direction = { x: 0, y: 1 };
+            if (direction.x !== 0 && !checkImmediateCollision(nextDirection)) {
+                direction = { x: 0, y: 1 };
+            }
         } else if (deltaY < 0 && direction.y === 0) {
             nextDirection = { x: 0, y: -1 };
-            if (direction.x !== 0 && !checkImmediateCollision(nextDirection)) direction = { x: 0, y: -1 };
+            if (direction.x !== 0 && !checkImmediateCollision(nextDirection)) {
+                direction = { x: 0, y: -1 };
+            }
         }
     }
 }
@@ -2260,6 +2351,7 @@ function onHsFromGameOver() {
     if (!overlay) return;
     populateHighScoreList();
     overlay.classList.add('visible');
+    playSound('src/sounds/beep1.mp3');
 }
 function gameOverButtonClickDebounce() {
     if (Date.now() - lastGameOverButtonTouch < 400) return true;
@@ -2325,6 +2417,8 @@ function setupHsIconToggle() {
         if (!wasVisible) populateHighScoreList();
         overlay.classList.toggle('visible');
         const nowVisible = overlay.classList.contains('visible');
+        if (nowVisible) playSound('src/sounds/beep1.mp3');
+        // if (!nowVisible) playSound('src/sounds/close.mp3');
         console.log('[HS] toggle', e.type, 'visible', wasVisible, '->', nowVisible, 'display=', getComputedStyle(overlay).display);
     }
     function onClick(e) {
@@ -2341,6 +2435,8 @@ function setupHsIconToggle() {
         console.log('[HS] onKeydown', e.key);
         if (!overlay.classList.contains('visible')) populateHighScoreList();
         overlay.classList.toggle('visible');
+        if (overlay.classList.contains('visible')) playSound('src/sounds/beep1.mp3');
+        // if (!overlay.classList.contains('visible')) playSound('src/sounds/close.mp3');
         console.log('[HS] keydown visible ->', overlay.classList.contains('visible'), 'display=', getComputedStyle(overlay).display);
     }
     hsIcon.addEventListener('click', onClick);
@@ -2354,6 +2450,7 @@ let lastInstructionsClose = 0;
 function openInstructions() {
     if (Date.now() - lastInstructionsClose < 300) return;
     if (instructionsOverlay) instructionsOverlay.classList.add('visible');
+    playSound('src/sounds/beep3.mp3');
 }
 function setupInsIconInstructions() {
     const insIcon = document.getElementById('insIcon');
@@ -2383,7 +2480,17 @@ function setupInsIconInstructions() {
 
 function setupHsCloseOnClickOutside() {
     const overlay = document.getElementById('highScoreOverlay');
+    const hsCloseBtn = document.getElementById('hsCloseBtn');
     if (!overlay) return;
+    if (hsCloseBtn) {
+        hsCloseBtn.addEventListener('click', () => {
+            overlay.classList.remove('visible');
+        });
+        hsCloseBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            overlay.classList.remove('visible');
+        }, { passive: false });
+    }
     function closeIfOutside(e) {
         if (!overlay.classList.contains('visible')) return;
         const t = e.target;
@@ -2392,6 +2499,7 @@ function setupHsCloseOnClickOutside() {
         if (t.closest('.game-over-buttons')) return;   // HS button opens overlay, don't close here
         if (t.closest('.instructions-overlay')) return;
         if (t.closest('.high-score-entry')) return;    // initials entry over overlay
+        // playSound('src/sounds/close.mp3');
         overlay.classList.remove('visible');
     }
     document.addEventListener('click', closeIfOutside);
@@ -2421,6 +2529,16 @@ function updateOuterContainerBorder() {
     //     outerContainer.style.border = 'none';
     // }
 }
+
+// Load overlay: fade out when ready (after init or after 2s)
+let loadOverlayFaded = false;
+function fadeLoadOverlay() {
+    if (loadOverlayFaded) return;
+    loadOverlayFaded = true;
+    const el = document.getElementById('loadOverlay');
+    if (el) el.classList.add('faded');
+}
+setTimeout(fadeLoadOverlay, 2000);
 
 // Initialize
 window.addEventListener('load', async () => {
@@ -2486,7 +2604,8 @@ window.addEventListener('load', async () => {
             { backgroundColor: '#ff0000', duration: 0.5 }
         ];
 
-        const borderTargets = [canvas, hsOverlay, playAgainBtn, hsBtn, instructionsOverlay, highScoreEntry].filter(Boolean);
+        const hsCloseBtn = document.getElementById('hsCloseBtn');
+        const borderTargets = [canvas, hsOverlay, playAgainBtn, hsBtn, instructionsOverlay, highScoreEntry, hsCloseBtn].filter(Boolean);
         const scoreContainer = document.querySelector('.score');
         const hsEntryLabel = document.getElementById('hsEntryLabel');
         const colorTargets = [scoreContainer, hsOverlay, startInstructionsBtn, instructionsOverlay, hsEntryScore, hsEntryLabel].filter(Boolean);
@@ -2501,6 +2620,7 @@ window.addEventListener('load', async () => {
         gsap.to(colorTargets, { keyframes: rainbowColorKeyframes, repeat: -1, ease: 'none' });
         gsap.to(bgTargets, { keyframes: rainbowBgKeyframes, repeat: -1, ease: 'none' });
     }
+    fadeLoadOverlay();
 });
 
 // On resize, only re-init layout if the game hasn't started yet
@@ -2548,12 +2668,14 @@ if (instructionsCloseBtn) {
         e.stopPropagation();
         if (instructionsOverlay) instructionsOverlay.classList.remove('visible');
         lastInstructionsClose = Date.now();
+        // playSound('src/sounds/close.mp3');
     });
     instructionsCloseBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (instructionsOverlay) instructionsOverlay.classList.remove('visible');
         lastInstructionsClose = Date.now();
+        // playSound('src/sounds/close.mp3');
     }, { passive: false });
 }
 

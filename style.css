@@ -26,6 +26,23 @@ body {
     overflow: hidden;
 }
 
+.load-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #160128;
+    z-index: 99999;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.25s ease-out;
+}
+
+.load-overlay.faded {
+    opacity: 0;
+}
+
 .game-outer-container {
     position: relative;
     max-width: 800px;
@@ -40,6 +57,18 @@ body {
     align-items: center;
     box-sizing: border-box;
     border: 4px solid #d4b5f5;
+}
+
+.flash-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
 }
 
 .rainbow-overlay {
@@ -169,6 +198,7 @@ body {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
+    transform-origin: center center;
     background: rgba(21, 0, 43, 0.9);
     border-radius: 12px;
     /* padding: 3px; */
@@ -181,6 +211,7 @@ body {
     display: block;
     background: transparent;
     flex-shrink: 0;
+    transform-origin: center center;
     aspect-ratio: 15 / 23;
     margin-left: auto;
     margin-right: auto;
@@ -448,11 +479,45 @@ body {
     padding: 8px 10px;
     box-sizing: border-box;
     z-index: 11;
+    border-radius: 12px;
     border: 5px solid #ff0000; /* rainbow via GSAP, same as game canvas */
+    overflow: visible;
+}
+
+.game-wrapper:has(.high-score-overlay.visible) {
+    overflow: visible;
 }
 
 .high-score-overlay.visible {
     display: flex;
+}
+
+.high-score-close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(40%, -40%);
+    width: 28px;
+    height: 28px;
+    padding: 2px 0 0 2px;
+    border: 3px solid #ff0000;
+    border-radius: 4px;
+    background: rgba(10, 0, 30, 0.98);
+    color: #ffffff;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 12;
+    font-family: 'Press Start 2P', monospace;
+    box-sizing: border-box;
+}
+
+.high-score-close-btn:hover,
+.high-score-close-btn:focus {
+    opacity: 0.9;
 }
 
 .high-score-header {
@@ -760,6 +825,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    transform-origin: center center;
     display: flex;
     flex-direction: column;
     align-items: center;
