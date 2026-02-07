@@ -74,8 +74,8 @@ let pendingColorChange = false;
 let newColor = null;
 let growthPending = 0; // Track how many segments to grow
 
-// Performance toggle: set to false to disable glow effect for better performance
-let enableGlow = true;
+// Performance: disable glow on mobile (blur is expensive)
+let enableGlow = !isMobileDevice();
 
 // FPS counter
 let fps = 0;
@@ -370,12 +370,12 @@ function loadImages() {
         bigHeadImage.src = 'src/img/worm/bigHead.png';
         bigTailImage.src = 'src/img/worm/bigTail.png';
         // Fruit images
-        cherryImage.src = 'src/img/fruit/cherry.png';
-        orangeImage.src = 'src/img/fruit/orange.png';
-        limeImage.src = 'src/img/fruit/lime.png';
-        grapeImage.src = 'src/img/fruit/grape.png';
-        strawberryImage.src = 'src/img/fruit/strawberry.png';
-        lemonImage.src = 'src/img/fruit/lemon.png';
+        cherryImage.src = 'src/img/fruit2/cherry.png';
+        orangeImage.src = 'src/img/fruit2/orange.png';
+        limeImage.src = 'src/img/fruit2/lime.png';
+        grapeImage.src = 'src/img/fruit2/grape.png';
+        strawberryImage.src = 'src/img/fruit2/strawberry.png';
+        lemonImage.src = 'src/img/fruit2/lemon.png';
         
         eyeImage.src = 'src/img/worm/eye.png';
     });
@@ -547,7 +547,7 @@ function initCanvas() {
             bigHead.style.height = bigHeadSize + 'px';
             
             // Update glow element to match big head
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.width = bigHeadSize + 'px';
                 bigHeadGlow.style.height = bigHeadSize + 'px';
                 bigHeadGlow.style.backgroundImage = bigHead.style.backgroundImage;
@@ -578,7 +578,7 @@ function initCanvas() {
             
             // Apply transform with scale immediately
             bigHead.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
             }
         }, 0);
@@ -772,7 +772,7 @@ function updateBigHeadImage(colorName) {
     bigHead.style.boxShadow = 'none';
     
     // Update glow element background image to match
-    if (bigHeadGlow) {
+    if (bigHeadGlow && !isMobileDevice()) {
         bigHeadGlow.style.backgroundImage = `url(${dataUrl})`;
         bigHeadGlow.style.backgroundSize = '100% 100%';
         bigHeadGlow.style.backgroundRepeat = 'no-repeat';
@@ -816,7 +816,7 @@ function updateBigHeadPosition() {
         bigHead.style.height = bigHeadSize + 'px';
         
         // Update glow element to match big head
-        if (bigHeadGlow) {
+        if (bigHeadGlow && !isMobileDevice()) {
             bigHeadGlow.style.width = bigHeadSize + 'px';
             bigHeadGlow.style.height = bigHeadSize + 'px';
             bigHeadGlow.style.backgroundImage = bigHead.style.backgroundImage;
@@ -842,7 +842,7 @@ function updateBigHeadPosition() {
                 // Apply transform for positioning and scale (rotation is in the image)
                 bigHead.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${currentHeadScale})`;
                 // Update glow element to match
-                if (bigHeadGlow) {
+                if (bigHeadGlow && !isMobileDevice()) {
                     bigHeadGlow.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${currentHeadScale})`;
                 }
                 // Update eye container rotation in sync with head position
@@ -861,7 +861,7 @@ function updateBigHeadPosition() {
         const x = gsap.getProperty(bigHead, "x") || headX;
         const y = gsap.getProperty(bigHead, "y") || headY;
         bigHead.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${headScale})`;
-        if (bigHeadGlow) {
+        if (bigHeadGlow && !isMobileDevice()) {
             bigHeadGlow.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${headScale})`;
         }
     }
@@ -1522,7 +1522,7 @@ function draw() {
             const headScale = getSegmentRippleScale(0);
             bigHead.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${headScale})`;
             // Update glow element to match
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.transform = `translate(calc(${x}px - 50%), calc(${y}px - 50%)) scale(${headScale})`;
             }
             
@@ -1597,23 +1597,21 @@ function draw() {
             const t = Math.min(1, age / fadeDur);
             const opacity = t;
             const offsetY = 15 * t;
-            const fontSize = 16;   // 25% smaller (was 24)
+            const fontSize = 22;   // 25% smaller (was 24)
             const lineHeight = 22;
             const cx = colorBonusFloat.x;
             const cy = colorBonusFloat.y - offsetY;
             ctx.save();
-            ctx.font = `${fontSize}px "Press Start 2P"`;
+            ctx.font = `${fontSize}px "Aptly", sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.globalAlpha = opacity;
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 4;
-            ctx.lineJoin = 'round';
-            ctx.miterLimit = 2;
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
             const y1 = cy - lineHeight / 2;
             const y2 = cy + lineHeight / 2;
-            ctx.strokeText('BONUS', cx, y1);
-            ctx.strokeText(`+${colorBonusFloat.bonus}`, cx, y2);
             ctx.fillStyle = '#ffffff';
             ctx.fillText('BONUS', cx, y1);
             ctx.fillText(`+${colorBonusFloat.bonus}`, cx, y2);
@@ -1796,7 +1794,7 @@ function gameOver() {
         // Set position directly without animation (no tween)
         const headScale = getSegmentRippleScale(0);
         bigHead.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
-        if (bigHeadGlow) {
+        if (bigHeadGlow && !isMobileDevice()) {
             bigHeadGlow.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
         }
     }
@@ -2020,7 +2018,7 @@ function resetGame() {
             bigHead.style.height = bigHeadSize + 'px';
             
             // Update glow element to match big head
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.width = bigHeadSize + 'px';
                 bigHeadGlow.style.height = bigHeadSize + 'px';
                 bigHeadGlow.style.backgroundImage = bigHead.style.backgroundImage;
@@ -2051,7 +2049,7 @@ function resetGame() {
             
             // Apply transform with scale immediately
             bigHead.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
             }
         }, 0);
@@ -2135,7 +2133,7 @@ function resetGame() {
             bigHead.style.height = bigHeadSize + 'px';
             
             // Update glow element to match big head
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.width = bigHeadSize + 'px';
                 bigHeadGlow.style.height = bigHeadSize + 'px';
                 bigHeadGlow.style.backgroundImage = bigHead.style.backgroundImage;
@@ -2151,7 +2149,7 @@ function resetGame() {
             // Apply transform immediately
             const headScale = getSegmentRippleScale(0);
             bigHead.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
-            if (bigHeadGlow) {
+            if (bigHeadGlow && !isMobileDevice()) {
                 bigHeadGlow.style.transform = `translate(calc(${headX}px - 50%), calc(${headY}px - 50%)) scale(${headScale})`;
             }
         }, 0);
@@ -2542,6 +2540,9 @@ setTimeout(fadeLoadOverlay, 2000);
 
 // Initialize
 window.addEventListener('load', async () => {
+    if (isMobileDevice()) {
+        document.documentElement.classList.add('mobile');
+    }
     await loadImages();
     initCanvas();
     pregenerateTintedImages(); // Generate tinted images after cellSize is set
@@ -2555,7 +2556,7 @@ window.addEventListener('load', async () => {
     if (instructionsMove) {
         instructionsMove.textContent = isMobileDevice()
             ? 'SWIPE TO MOVE WORM'
-            : 'USE ARROW KEYS OR ASDF TO MOVE WORM';
+            : 'USE ARROW KEYS OR WASD TO MOVE WORM';
     }
     setupHsIconToggle();
     setupInsIconInstructions();

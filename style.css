@@ -1,3 +1,19 @@
+@font-face {
+    font-family: 'Aptly';
+    src: url('src/fonts/Aptly.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Arcade';
+    src: url('src/fonts/ARCADE_N.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -46,7 +62,6 @@ body {
 .game-outer-container {
     position: relative;
     max-width: 800px;
-    max-height: 700px;
     width: 100%;
     height: 100%;
     overflow: hidden; /* mask fruit rain within this container */
@@ -56,7 +71,6 @@ body {
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    border: 4px solid #d4b5f5;
 }
 
 .flash-overlay {
@@ -86,7 +100,6 @@ body {
 
 @media (max-width: 600px) {
     .game-outer-container {
-        max-height: 100%;
         border: none;
     }
 }
@@ -137,8 +150,8 @@ body {
 
 .logo {
     position: absolute;
-    top: 5px;
-    left: 5px;
+    top: 10px;
+    left: 10px;
     z-index: 1;
     pointer-events: none;
 }
@@ -157,7 +170,7 @@ body {
     margin-right: auto;
     margin-bottom: 0;
     color: white;
-    z-index: 1;
+    z-index: 0;
 }
 
 .score-board {
@@ -168,8 +181,8 @@ body {
 }
 
 .score {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 1.2rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.4rem;
     color: #00ffff;
     display: block;
     background: black;
@@ -228,6 +241,7 @@ body {
     z-index: 0;
     pointer-events: none;
     width: 400px;
+    opacity: 0;
 }
 
 .cloud-ul {
@@ -261,6 +275,10 @@ body {
     transform: translate(-50%, -50%);
     transform-origin: 50% 50%;
     filter: blur(8px);
+}
+
+.mobile .big-head-glow {
+    display: none;
 }
 
 .big-head {
@@ -379,8 +397,8 @@ body {
     top: 10px;
     right: 10px;
     color: #00ffff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.65rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.3rem;
     z-index: 9999;
     opacity: 0;
     pointer-events: none;
@@ -392,15 +410,15 @@ body {
 }
 
 .icons-top-right {
-    --icons-offset: 10px;
+    /* --icons-offset: 5px; */
     position: absolute;
-    top: var(--icons-offset);
-    right: var(--icons-offset);
+    top: 10px;
+    right: 10px;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     justify-content: flex-end;
-    gap: 4px;
+    gap: 6px;
     z-index: 100;
     pointer-events: auto;
     /* border: 1px solid red; */
@@ -409,57 +427,59 @@ body {
 .hs-icon {
     position: relative;
     z-index: 1;
-    width: auto;
-    height: auto;
-    transform: scale(3) translateX(-5px);
+    width: 27px;
+    height: 27px;
+    /* transform: translateX(-20px); */
     transform-origin: top right;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
+    /* image-rendering: pixelated; */
+    /* image-rendering: -moz-crisp-edges; */
+    /* image-rendering: crisp-edges; */
     pointer-events: auto;
     cursor: pointer;
 }
 
 .ins-icon-wrap {
     position: absolute;
-    right: 17px;
+    /* right: 17px; */
     display: inline-flex;
     position: relative;
-    transform: scale(3);
+    width: 27px;
+    height: 27px;
+    /* transform: scale(3); */
     transform-origin: top left;
     pointer-events: auto;
     cursor: pointer;
 }
 
 .ins-icon {
-    width: auto;
-    height: auto;
+    width: 27px;
+    height: 27px;
     display: block;
-    opacity: 0;
+    /* opacity: 0;
     pointer-events: none;
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
+    image-rendering: crisp-edges; */
 }
 
 .ins-icon-rainbow {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #1fc7ff;
-    -webkit-mask-image: url('src/img/ins_icon.png');
-    mask-image: url('src/img/ins_icon.png');
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
+    width: 32px;
+    height: 32px;
+    /* background-color: #1fc7ff; */
+    /* -webkit-mask-image: url('src/img/ins_icon.png'); */
+    /* mask-image: url('src/img/ins_icon.png'); */
+    /* -webkit-mask-size: 100% 100%; */
+    /* mask-size: 100% 100%; */
+    /* -webkit-mask-repeat: no-repeat; */
+    /* mask-repeat: no-repeat; */
+    /* -webkit-mask-position: center; */
+    /* mask-position: center; */
+    /* image-rendering: pixelated; */
+    /* image-rendering: -moz-crisp-edges; */
+    /* image-rendering: crisp-edges; */
 }
 
 .high-score-overlay {
@@ -470,8 +490,8 @@ body {
     height: 100%;
     background: rgba(10, 0, 30, 0.96);
     color: #ffffff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 1rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.3rem;
     display: none;
     flex-direction: column;
     align-items: stretch;
@@ -499,19 +519,19 @@ body {
     transform: translate(40%, -40%);
     width: 28px;
     height: 28px;
-    padding: 2px 0 0 2px;
+    padding: 1px 0 3px 1px;
     border: 3px solid #ff0000;
     border-radius: 4px;
     background: rgba(10, 0, 30, 0.98);
     color: #ffffff;
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 12;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Aptly', sans-serif;
     box-sizing: border-box;
 }
 
@@ -522,14 +542,14 @@ body {
 
 .high-score-header {
     text-align: center;
-    font-size: 1rem;
+    font-size: 1.4rem;
     margin-bottom: 6px;
 }
 
 .high-score-row {
     display: flex;
     align-items: center;
-    font-size: 1rem;
+    font-size: 1.45rem;
     padding: 4px 0;
 }
 
@@ -612,8 +632,8 @@ body {
 
 .start-btn {
     width: 100%;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 1.2rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.4rem;
     color: #000000;
     background: #ff0000; /* rainbow via GSAP */
     border: none;
@@ -625,12 +645,14 @@ body {
 #startPlayBtn {
     /* transform: translateY(3px); */
     padding-top: 12px;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.7rem;
 }
 
 #startInstructionsBtn {
     background: none;
     color: #ff0000; /* rainbow via GSAP */
-    font-size: 0.75rem; /* 40% smaller than 1.2rem */
+    font-size: 1.2rem;
     padding: 12px 8px;
 }
 
@@ -651,8 +673,8 @@ body {
     height: 100%;
     background: rgba(10, 0, 30, 0.96);
     color: #ffffff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.75rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.2rem;
     display: none;
     flex-direction: column;
     align-items: stretch;
@@ -670,7 +692,7 @@ body {
 .instructions-header {
     flex-shrink: 0;
     text-align: center;
-    font-size: 1rem;
+    font-size: 1.4rem;
     margin-bottom: 12px;
 }
 
@@ -693,14 +715,14 @@ body {
     text-align: center;
     margin: 4px 0;
     padding-bottom: 7px;
-    font-size: 0.6rem;
+    font-size: 1.15rem;
 }
 
 .instructions-close-btn {
     align-self: center;
     margin-top: auto;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.8rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.2rem;
     color: #000000;
     background: #ff0000; /* rainbow via GSAP */
     border: none;
@@ -718,8 +740,8 @@ body {
     top: 10px;
     right: 10px;
     color: #00ffff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.8rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.15rem;
     z-index: 10;
     opacity: 0;
     pointer-events: none;
@@ -743,7 +765,7 @@ body {
     border-radius: 0;
     text-align: center;
     z-index: 10;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Aptly', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -756,7 +778,7 @@ body {
 }
 
 .game-over-title {
-    font-size: 1.1rem;
+    font-size: 1.55rem;
     letter-spacing: 2px;
     margin: 0;
     color: #000000;
@@ -785,10 +807,10 @@ body {
 .game-over-btn {
     width: 45px;
     height: 45px;
-    padding: 6px;
+    padding: 4px;
     border: 3px solid #ff0000; /* rainbow via GSAP */
     box-sizing: content-box;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Aptly', sans-serif;
     font-size: 0;
     letter-spacing: 1px;
     color: transparent;
@@ -797,9 +819,9 @@ body {
     cursor: pointer;
     text-align: center;
     transform-origin: top left;
-    image-rendering: pixelated;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: crisp-edges;
+    /* image-rendering: pixelated; */
+    /* image-rendering: -moz-crisp-edges; */
+    /* image-rendering: crisp-edges; */
 }
 
 #playAgainBtn {
@@ -835,7 +857,7 @@ body {
     box-sizing: border-box;
     background: rgba(10, 0, 30, 0.96);
     color: #ffffff;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Aptly', sans-serif;
     z-index: 12;
     border: 5px solid #ff0000;
     min-width: 220px;
@@ -847,21 +869,21 @@ body {
 }
 
 .hs-entry-score {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     text-align: center;
     margin: 0;
 }
 
 .hs-entry-label {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     line-height: 1.8;
     text-align: center;
     margin: 0;
 }
 
 .hs-entry-input {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 1.2rem;
+    font-family: 'Aptly', sans-serif;
+    font-size: 1.4rem;
     width: 7em;
     text-align: center;
     letter-spacing: 0.2em;
@@ -879,10 +901,10 @@ body {
 
 @media (max-width: 600px) {
     .score {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
     .start-btn {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
     #startInstructionsBtn {
         /* font-size: 0.6rem;  */
